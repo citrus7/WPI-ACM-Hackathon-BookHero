@@ -1,0 +1,28 @@
+/* unvisited link */
+a:link {
+    color: #3333FF;
+}
+
+/* visited link */
+a:visited {
+    color: #3333FF;
+}
+
+/* mouse over link */
+a:hover {
+    color: #3300FF;
+}
+
+/* selected link */
+a:active {
+    color: #3300FF;
+}
+
+.img-container { position: relative; }
+
+.img-container .top {
+  position: absolute;
+  top: 0;
+  left: 15px;
+  z-index: 1;
+}

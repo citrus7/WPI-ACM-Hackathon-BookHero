@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>ebook Finder - beta</title>
+
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/stylish-portfolio.css" rel="stylesheet">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+    <link href="css/jqueryui.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+    <!-- Header -->
+    <header id="top" class="header">
+
+
+        <div class="text-vertical-center" id="main-section">
+          <div id="main-title"><h4>Input WPI Course ID (beta testing)</h4></div>
+            <div class="input-group input-group-lg" id="search-control" style="width:405px; margin-left: auto; margin-right: auto;">
+              <input type="text" class="form-control" id="search-bar" placeholder="e.g. CS 2011" />
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="button" id="search-button" onclick="enter_course_id();">Search</button>
+              </span>
+            </div>
+
+            <div class="alert alert-info alert-dismissible" role="alert" id="messagebox" style="width:380px; margin: 10px auto 10px; text-align: left;" >
+              <div id="message-content"></div>
+            </div>
+            
+            <br>
+            <div id="results-section" style="width:500px; margin-left: auto; margin-right: auto;"></div>
+        </div>
+    </header>
+
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+
+    <script>
+    var course_ids = ["AE 2713","AE 3410","AE 4719","AE 4723","AE 5200","AE 5381","AR 1101","AR 2114","AREN 2023","AREN 3001","AREN 3003","BB 2950","BB 3102","BME 3111","BME 4011","BME 4828","BUS 1010","BUS 2080","CE 2001","CE 3008","CE 3025","CE 3050","CE 3074","CH 1020","CH 2360","CH 3550","CH 4120","CH 4150","CH 4330","CH 555","CHE 1011","CHE 2012","CHE 4402","CN 1542","CN 230X","CS 2011","CS 2223","CS 2301","CS 3042","CS 3431","CS 3516","CS 3733","CS 4033","CS 4100","CS 4445","CS 4732","ECE 2029","ECE 2311","ECE 3204","ECE 3311","ECE 3503","ECE 4011","ECE 4904","ECON 212X","EN 1221","EN 1242","EN 1251","EN 1241","EN 2224","EN 2231","EN 2238","EN 2251","EN 2252","EN 3219","ENV 1100","ES 1310","ES 2001","ES 2501","ES 2502","ES 2503","ES 3001","ES 3003","ES 3004","FY 1800","GN 1512","GOV 1320","GOV 2320","HI 1311","HI 1322","HI 1331","HI 2313","HI 2316","HI 2317","HI 2321","HI 2332","HI 2343","HI 3334","HI 3341","HU 1402","HU 3900","IMGD 1000","IMGD 2900","IMGD 3030","IMGD 4100","ISE 1801","MA 1021","MA 1022","MA 1023","MA 1024","MA 1034","MA 2051","MA 2071","MA 2431","MA 2611","MA 2612","MA 3211","MA 3457","MA 3631","MA 3823","MA 3832","MA 4473","ME 2300","ME 2820","ME 3320","ME 3410","ME 3901","ME 4506","ME 5200","ME 5304","ME 5381","MPE 530","MTE 532","MU 202X","MU 2730","PH 1120","PH 1121","PH 1140","PH 2202","PH 2501","PH 3401","PSY 1401","PY 2711"];
+    
+    $('#messagebox').hide();
+
+    var showError = function(message) {
+      $('#message-content').text(message);
+      $('#messagebox').show();
+      window.setTimeout(function() { $("#messagebox").hide(); }, 2200);
+    
+    }
+
+    $('img').bind('error', function (e) {
+      console.log('image error: ' + this.src);
+    });
+
+    $("#search-bar").keyup(function(event){
+      if(event.keyCode == 13) { $("#search-button").click(); }
+    });
+
+    $("#search-bar").autocomplete({
+      source: function(request, response) {
+        var results = $.ui.autocomplete.filter(course_ids, request.term.toUpperCase());
+        response(results.slice(0, 5));
+      }
+    });
+
+    var enter_course_id = function() {
+      var input = $('#search-bar').val().toUpperCase();
+      if (input == "") return;
+
+      if (input.indexOf(' ') <= 0) {
+        showError('Invalid format, e.g. CS 2011.');
+        return;
+      }
+      
+      if (course_ids.indexOf(input) == -1) {
+        showError('Sorry, no course ID found.');
+        return;
+      }
+      
+      $("#results-section").html('');
+      
+      request_booknames(input);
+      
+      $("#main-title").remove();
+      $("#main-section").removeClass("text-vertical-center", { duration: 500 });
+      $("#main-section").before("<br>");
+    };
+
+    var all_books = [];
+
+    var request_booknames = function(course_id) {
+      $.getJSON("/search_books?course=" + course_id, function(books) {
+        for (var i = 0; i < books.length; i++) 
+          all_books.push(books[i]); //all_books[books[i].isbn] = books[i];
+
+        var seq_request = setInterval(function() {
+          if (all_books.length == 0) { clearInterval(seq_request); console.log("killed seq_request"); }
+          var book = all_books.pop();
+          //console.log("next"); 
+          if (book) {
+            var isbn = book.isbn;
+            if (book.isbn_searchable == 1) {
+              search_download_by_isbn(isbn);
+            }
+            else {
+              search_downloads_by_title(book.title, book.author, isbn);
+            }
+            $("#results-section").append('<div id="well-'+isbn+'" class="well"><div class="row"><div class="col-sm-8" id="info-'+isbn+'"></div><div class="col-sm-2 img-container" id="foto-'+isbn+'"></div></div></div>');
+
+            $("#foto-"+isbn).append('<img class="bottom" src="/img/noimg.png" height="140" width="95"/>');
+            $("#foto-"+isbn).append('<img class="top" src="http://covers.openlibrary.org/b/isbn/'+isbn+'-M.jpg" height="140" width="100"/>');
+            $("#info-"+isbn).append('<div id="title-'+isbn+'"><h4><b>'+book.title+'</b></h4></div>');
+            $("#info-"+isbn).append('<div id="edition-'+isbn+'"><h5>Edition: '+book.edition+'</h5></div>');
+            $("#info-"+isbn).append('<div id="author-'+isbn+'"><h5>'+book.author+'</h5></div>');
+            $("#info-"+isbn).append('<p><a href="http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords='+isbn+'">Amazon Link</a></p>');
+            $("#info-"+isbn).append('<div id="download-'+isbn+'"><img src="/img/loading.gif""/></div>');
+          }
+        }, 1000);
+      });
+    };
+
+    var search_download_by_isbn = function(isbn) {
+      $.getJSON("/search_download_by_isbn?isbn=" + isbn, function(books) {
+        if (books.length == 0) {
+          $("#download-"+isbn).html('Sorry, no ebook found');
+        }
+        else {
+          $("#download-"+isbn).html('<a href="'+books[0].link+'">Download - libgen (.'+books[0].file+')</a>');
+        }
+      });
+    };
+
+    var search_downloads_by_title = function(bookname, author, isbn) {
+      $.getJSON("/search_downloads_by_title?bookname=" + bookname + "&author=" + author, function(books) {
+        if (books.length == 0) {
+          $("#download-"+isbn).html('Sorry, no ebook found');
+        }
+        else {
+          $("#download-"+isbn).html('<a href="'+books[0].link+'">Download - libgen (.'+books[0].file+')</a>');
+        }
+      });
+    };
+
+
+    </script>
+
+</body>
+
+</html>
